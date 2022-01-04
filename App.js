@@ -6,6 +6,7 @@ import {
     StyleSheet,
     TextInput,
     ToastAndroid,
+    StatusBar,
 } from 'react-native';
 import Empty from './components/Empty';
 import TodoList from './components/TodoList';
@@ -41,6 +42,7 @@ const App = () => {
 
     return (
         <SafeAreaView style={styles.container}>
+            <StatusBar backgroundColor="#990" />
             {todoList.length > 0 ? (
                 <TodoList
                     item={todoList}
