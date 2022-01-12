@@ -21,17 +21,27 @@ const App = () => {
                 <Button
                     color={bg}
                     title="LEFT"
-                    onPress={() => setAction('LEFT')}
+                    onPress={() => setAction({ action: 'LEFT' })}
+                />
+                <Button
+                    color={bg}
+                    title="UP"
+                    onPress={() => setAction({ action: 'UP' })}
                 />
                 <Button
                     color="red"
                     title="INIT"
-                    onPress={() => setAction('INIT')}
+                    onPress={() => setAction({ action: 'INIT' })}
+                />
+                <Button
+                    color={bg}
+                    title="DOWN"
+                    onPress={() => setAction({ action: 'DOWN' })}
                 />
                 <Button
                     color={bg}
                     title="RIGHT"
-                    onPress={() => setAction('RIGHT')}
+                    onPress={() => setAction({ action: 'RIGHT' })}
                 />
             </View>
         </SafeAreaView>
