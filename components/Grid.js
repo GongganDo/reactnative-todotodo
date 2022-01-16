@@ -2,6 +2,27 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, ToastAndroid, View } from 'react-native';
 import GridRow from './GridRow';
 
+// 배열 동일 여부 체크
+const arrayIsEqual = (arr1, arr2) => {
+    if (arr1.length === arr2.length) {
+        for (let i = 0; i < arr1.length; i++) {
+            const i1 = arr1[i],
+                i2 = arr2[i];
+            if (i1 !== i2) {
+                if (Array.isArray(i1) && Array.isArray(i2)) {
+                    if (!arrayIsEqual(i1, i2)) {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    return false;
+};
+
 const Grid = ({ action }) => {
     // action 바뀔 경우 처리
     useEffect(() => {
@@ -40,11 +61,13 @@ const Grid = ({ action }) => {
                 newData = cb(dt, initialData);
             }
 
-            const val = setRandom(newData);
-            if (val) {
-                newData[val[0]][val[1]] = 2;
+            if (arrayIsEqual(newData, dt)) {
+                // pass
             } else {
-                ToastAndroid.show('GAME OVER', ToastAndroid.LONG);
+                const val = setRandom(newData);
+                if (val) {
+                    newData[val[0]][val[1]] = 2;
+                }
             }
 
             return newData;
