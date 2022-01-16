@@ -26,16 +26,35 @@ const Grid = ({ action }) => {
         setData(defaultData);
     };
 
-    // 왼쪽으로 가기
-    const goLeft = () => {
+    const goTemplate = cb => {
         setData(dt => {
-            const newData = [
+            const initialData = [
                 [0, 0, 0, 0],
                 [0, 0, 0, 0],
                 [0, 0, 0, 0],
                 [0, 0, 0, 0],
             ];
+            let newData = initialData;
 
+            if (typeof cb === 'function') {
+                newData = cb(dt, initialData);
+            }
+
+            const val = setRandom(newData);
+            if (val) {
+                newData[val[0]][val[1]] = 2;
+            } else {
+                ToastAndroid.show('GAME OVER', ToastAndroid.LONG);
+            }
+
+            return newData;
+        });
+    };
+
+    // 왼쪽으로 가기
+    const goLeft = () => {
+        goTemplate((dt, dd) => {
+            const newData = dd;
             for (let i = 0; i < 4; i++) {
                 let lastI = 0;
                 for (let j = 0; j < 4; j++) {
@@ -48,28 +67,14 @@ const Grid = ({ action }) => {
                     }
                 }
             }
-
-            const val = setRandom(newData);
-            if (val) {
-                newData[val[0]][val[1]] = 2;
-            } else {
-                ToastAndroid.show('GAME OVER', ToastAndroid.LONG);
-            }
-
             return newData;
         });
     };
 
     // 오른쪽으로 가기
     const goRight = () => {
-        setData(dt => {
-            const newData = [
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-            ];
-
+        goTemplate((dt, dd) => {
+            const newData = dd;
             for (let i = 0; i < 4; i++) {
                 let lastI = 3;
                 for (let j = 3; j >= 0; j--) {
@@ -82,28 +87,14 @@ const Grid = ({ action }) => {
                     }
                 }
             }
-
-            const val = setRandom(newData);
-            if (val) {
-                newData[val[0]][val[1]] = 2;
-            } else {
-                ToastAndroid.show('GAME OVER', ToastAndroid.LONG);
-            }
-
             return newData;
         });
     };
 
     // 위으로 가기
     const goUp = () => {
-        setData(dt => {
-            const newData = [
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-            ];
-
+        goTemplate((dt, dd) => {
+            const newData = dd;
             for (let i = 0; i < 4; i++) {
                 let lastI = 0;
                 for (let j = 0; j < 4; j++) {
@@ -116,27 +107,13 @@ const Grid = ({ action }) => {
                     }
                 }
             }
-
-            const val = setRandom(newData);
-            if (val) {
-                newData[val[0]][val[1]] = 2;
-            } else {
-                ToastAndroid.show('GAME OVER', ToastAndroid.LONG);
-            }
-
             return newData;
         });
     };
     // 아래로 가기
     const goDown = () => {
-        setData(dt => {
-            const newData = [
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-            ];
-
+        goTemplate((dt, dd) => {
+            const newData = dd;
             for (let i = 0; i < 4; i++) {
                 let lastI = 3;
                 for (let j = 3; j >= 0; j--) {
@@ -149,14 +126,6 @@ const Grid = ({ action }) => {
                     }
                 }
             }
-
-            const val = setRandom(newData);
-            if (val) {
-                newData[val[0]][val[1]] = 2;
-            } else {
-                ToastAndroid.show('GAME OVER', ToastAndroid.LONG);
-            }
-
             return newData;
         });
     };
