@@ -1,7 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import NumBox from '../models/NumBox';
 
-const GridBox = ({ num }) => {
+const GridBox = ({ box }) => {
+    const num = box instanceof NumBox ? box.num : 0;
+
     const colorStyle = {
         backgroundColor: getColor(num),
     };
