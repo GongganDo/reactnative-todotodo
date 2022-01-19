@@ -7,6 +7,9 @@ import {
     View,
     Alert,
 } from 'react-native';
+import GestureRecognizer, {
+    swipeDirections,
+} from 'react-native-swipe-gestures';
 import Grid from './components/Grid';
 import Header from './components/Header';
 
@@ -28,11 +31,39 @@ const App = () => {
         );
     };
 
+    const onSwipe = (gestureName, gestureState) => {
+        console.log('swipe', {gestureName, gestureState})
+        const { SWIPE_UP, SWIPE_DOWN, SWIPE_LEFT, SWIPE_RIGHT } =
+            swipeDirections;
+        switch (gestureName) {
+            case SWIPE_UP:
+                setAction({ action: 'UP' });
+                break;
+            case SWIPE_DOWN:
+                setAction({ action: 'DOWN' });
+                break;
+            case SWIPE_LEFT:
+                setAction({ action: 'LEFT' });
+                break;
+            case SWIPE_RIGHT:
+                setAction({ action: 'RIGHT' });
+                break;
+        }
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar backgroundColor={bg} />
             <Header title="2048" backgroundColor={bg} />
-            <Grid action={action} />
+            <GestureRecognizer
+                onSwipe={onSwipe}
+                config={{
+                    velocityThreshold: 0.3,
+                    directionalOffsetThreshold: 80,
+                }}
+                style={{ flex: 1 }}>
+                <Grid action={action} />
+            </GestureRecognizer>
             <View style={styles.buttonView}>
                 <Button
                     color={bg}
