@@ -31,6 +31,7 @@ const gridColor = [
     '#edc950', // 512
     '#edc53f', // 1024
     '#edc22e', // 2048
+    '#3c3a33', // 4096
 ];
 
 const getColor = num => {

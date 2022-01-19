@@ -52,10 +52,10 @@ const Grid = ({ action }) => {
     const goTemplate = cb => {
         setData(dt => {
             const initialData = [
-                [new NumBox(0), new NumBox(0), new NumBox(0), new NumBox(0)],
-                [new NumBox(0), new NumBox(0), new NumBox(0), new NumBox(0)],
-                [new NumBox(0), new NumBox(0), new NumBox(0), new NumBox(0)],
-                [new NumBox(0), new NumBox(0), new NumBox(0), new NumBox(0)],
+                [null, null, null, null],
+                [null, null, null, null],
+                [null, null, null, null],
+                [null, null, null, null],
             ];
             let newData = initialData;
 
@@ -87,7 +87,7 @@ const Grid = ({ action }) => {
             for (let i = 0; i < 4; i++) {
                 let lastI = 0;
                 for (let j = 0; j < 4; j++) {
-                    if (!dt[i][j].isEmpty()) {
+                    if (dt[i][j]) {
                         if (
                             lastI > 0 &&
                             newData[i][lastI - 1].equals(dt[i][j])
@@ -110,7 +110,7 @@ const Grid = ({ action }) => {
             for (let i = 0; i < 4; i++) {
                 let lastI = 3;
                 for (let j = 3; j >= 0; j--) {
-                    if (!dt[i][j].isEmpty()) {
+                    if (dt[i][j]) {
                         if (
                             lastI < 3 &&
                             newData[i][lastI + 1].equals(dt[i][j])
@@ -133,7 +133,7 @@ const Grid = ({ action }) => {
             for (let i = 0; i < 4; i++) {
                 let lastI = 0;
                 for (let j = 0; j < 4; j++) {
-                    if (!dt[j][i].isEmpty()) {
+                    if (dt[j][i]) {
                         if (
                             lastI > 0 &&
                             newData[lastI - 1][i].equals(dt[j][i])
@@ -155,7 +155,7 @@ const Grid = ({ action }) => {
             for (let i = 0; i < 4; i++) {
                 let lastI = 3;
                 for (let j = 3; j >= 0; j--) {
-                    if (!dt[j][i].isEmpty()) {
+                    if (dt[j][i]) {
                         if (
                             lastI < 3 &&
                             newData[lastI + 1][i].equals(dt[j][i])
@@ -177,7 +177,7 @@ const Grid = ({ action }) => {
         const zeroList = [];
         for (let i = 0; i < 4; i++) {
             for (let j = 0; j < 4; j++) {
-                if (dt[i][j].isEmpty()) {
+                if (!dt[i][j]) {
                     zeroList.push([i, j]);
                 }
             }
@@ -202,10 +202,10 @@ const Grid = ({ action }) => {
 };
 
 const defaultData = [
-    [new NumBox(0), new NumBox(2), new NumBox(0), new NumBox(2)],
-    [new NumBox(0), new NumBox(0), new NumBox(0), new NumBox(0)],
-    [new NumBox(0), new NumBox(0), new NumBox(0), new NumBox(0)],
-    [new NumBox(0), new NumBox(0), new NumBox(0), new NumBox(0)],
+    [null, new NumBox(2), null, new NumBox(2)],
+    [null, null, null, null],
+    [null, null, null, null],
+    [null, null, null, null],
 ];
 
 const styles = StyleSheet.create({

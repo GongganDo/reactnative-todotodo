@@ -7,7 +7,10 @@ const GridRow = ({ id = 0, boxList = [] }) => {
     return (
         <View style={styles.container}>
             {boxList.map(d => (
-                <GridBox box={d} key={`gridbox_key_${d._id}`} />
+                <GridBox
+                    box={d}
+                    key={`gridbox_key_${d ? d._id : randomCode()}`}
+                />
             ))}
         </View>
     );
