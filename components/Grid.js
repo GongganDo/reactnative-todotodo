@@ -41,11 +41,11 @@ const Grid = ({ action }) => {
         }
     }, [action]);
 
-    const [data, setData] = useState(defaultData);
+    const [data, setData] = useState(getDefaultData());
 
     // 배열 초기화
     const init = () => {
-        setData(defaultData);
+        setData(getDefaultData());
     };
 
     // data 초기화, 불변성 유지를 위해 비교 로직 제외하고 공통화
@@ -201,7 +201,7 @@ const Grid = ({ action }) => {
     );
 };
 
-const defaultData = [
+const getDefaultData = () => [
     [null, new NumBox(2), null, new NumBox(2)],
     [null, null, null, null],
     [null, null, null, null],

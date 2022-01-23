@@ -32,7 +32,8 @@ const App = () => {
     };
 
     const onSwipe = (gestureName, gestureState) => {
-        console.log('swipe', {gestureName, gestureState})
+        const { dx, dy, vx, vy } = gestureState;
+        console.log('swipe', gestureName, [dx, dy], [vx, vy]);
         const { SWIPE_UP, SWIPE_DOWN, SWIPE_LEFT, SWIPE_RIGHT } =
             swipeDirections;
         switch (gestureName) {
@@ -58,10 +59,10 @@ const App = () => {
             <GestureRecognizer
                 onSwipe={onSwipe}
                 config={{
-                    velocityThreshold: 0.3,
-                    directionalOffsetThreshold: 80,
+                    velocityThreshold: 0.05,
+                    directionalOffsetThreshold: 100,
                 }}
-                style={{ flex: 1 }}>
+                style={styles.gestureContainer}>
                 <Grid action={action} />
             </GestureRecognizer>
             <View style={styles.buttonView}>
@@ -95,6 +96,7 @@ const bg = '#990';
 
 const styles = StyleSheet.create({
     container: { flex: 1 },
+    gestureContainer: { flex: 1, backgroundColor: '#fff' },
     buttonView: {
         flexDirection: 'row',
         justifyContent: 'space-between',
