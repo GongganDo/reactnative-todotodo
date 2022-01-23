@@ -3,6 +3,8 @@ import { StyleSheet, ToastAndroid, View } from 'react-native';
 import NumBox from '../models/NumBox';
 import GridRow from './GridRow';
 
+const BOX_SIZE = 4;
+
 // 배열 동일 여부 체크
 const arrayIsEqual = (arr1, arr2) => {
     if (arr1.length === arr2.length) {
@@ -41,27 +43,22 @@ const Grid = ({ action }) => {
         }
     }, [action]);
 
-    const [data, setData] = useState(getDefaultData());
+    const [data, setData] = useState(getStartData());
 
     // 배열 초기화
     const init = () => {
-        setData(getDefaultData());
+        setData(getStartData());
     };
 
     // data 초기화, 불변성 유지를 위해 비교 로직 제외하고 공통화
     const goTemplate = cb => {
         setData(dt => {
-            const initialData = [
-                [null, null, null, null],
-                [null, null, null, null],
-                [null, null, null, null],
-                [null, null, null, null],
-            ];
-            let newData = initialData;
+            // null이 들어간 배열로 초기화
+            let newData = getInitialData();
 
             // newDat 만드는 동작은 callback (cb) 에서 처리. cb가 없으면 그대로 둔다.
             if (typeof cb === 'function') {
-                newData = cb(dt, initialData) || dt;
+                newData = cb(dt, newData) || dt;
             } else {
                 newData = dt;
             }
@@ -84,9 +81,9 @@ const Grid = ({ action }) => {
     const goLeft = () => {
         goTemplate((dt, dd) => {
             const newData = dd;
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < BOX_SIZE; i++) {
                 let lastI = 0;
-                for (let j = 0; j < 4; j++) {
+                for (let j = 0; j < BOX_SIZE; j++) {
                     if (dt[i][j]) {
                         if (
                             lastI > 0 &&
@@ -107,12 +104,12 @@ const Grid = ({ action }) => {
     const goRight = () => {
         goTemplate((dt, dd) => {
             const newData = dd;
-            for (let i = 0; i < 4; i++) {
-                let lastI = 3;
-                for (let j = 3; j >= 0; j--) {
+            for (let i = 0; i < BOX_SIZE; i++) {
+                let lastI = BOX_SIZE - 1;
+                for (let j = BOX_SIZE - 1; j >= 0; j--) {
                     if (dt[i][j]) {
                         if (
-                            lastI < 3 &&
+                            lastI < BOX_SIZE - 1 &&
                             newData[i][lastI + 1].equals(dt[i][j])
                         ) {
                             newData[i][lastI + 1] = dt[i][j].multiple();
@@ -130,9 +127,9 @@ const Grid = ({ action }) => {
     const goUp = () => {
         goTemplate((dt, dd) => {
             const newData = dd;
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < BOX_SIZE; i++) {
                 let lastI = 0;
-                for (let j = 0; j < 4; j++) {
+                for (let j = 0; j < BOX_SIZE; j++) {
                     if (dt[j][i]) {
                         if (
                             lastI > 0 &&
@@ -152,12 +149,12 @@ const Grid = ({ action }) => {
     const goDown = () => {
         goTemplate((dt, dd) => {
             const newData = dd;
-            for (let i = 0; i < 4; i++) {
-                let lastI = 3;
-                for (let j = 3; j >= 0; j--) {
+            for (let i = 0; i < BOX_SIZE; i++) {
+                let lastI = BOX_SIZE - 1;
+                for (let j = BOX_SIZE - 1; j >= 0; j--) {
                     if (dt[j][i]) {
                         if (
-                            lastI < 3 &&
+                            lastI < BOX_SIZE - 1 &&
                             newData[lastI + 1][i].equals(dt[j][i])
                         ) {
                             newData[lastI + 1][i] = dt[j][i].multiple();
@@ -175,8 +172,8 @@ const Grid = ({ action }) => {
     const setRandom = dt => {
         // 0이 들어가 있는 리스트 찾기
         const zeroList = [];
-        for (let i = 0; i < 4; i++) {
-            for (let j = 0; j < 4; j++) {
+        for (let i = 0; i < BOX_SIZE; i++) {
+            for (let j = 0; j < BOX_SIZE; j++) {
                 if (!dt[i][j]) {
                     zeroList.push([i, j]);
                 }
@@ -201,12 +198,16 @@ const Grid = ({ action }) => {
     );
 };
 
-const getDefaultData = () => [
-    [null, new NumBox(2), null, new NumBox(2)],
-    [null, null, null, null],
-    [null, null, null, null],
-    [null, null, null, null],
-];
+const getInitialData = () =>
+    Array.from({ length: BOX_SIZE }, () => Array(BOX_SIZE).fill(null));
+const getStartData = () => {
+    const rand = () => Math.floor(Math.random() * BOX_SIZE);
+    const data = getInitialData();
+    // TODO 둘이 겹치는 경우? 깔끔한 방법이 없을까..
+    data[rand()][rand()] = new NumBox(2);
+    data[rand()][rand()] = new NumBox(2);
+    return data;
+};
 
 const styles = StyleSheet.create({
     container: {

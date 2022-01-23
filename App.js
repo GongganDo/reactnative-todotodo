@@ -59,7 +59,9 @@ const App = () => {
             <GestureRecognizer
                 onSwipe={onSwipe}
                 config={{
+                    // swipe가 적용되기 위한 최소 속도
                     velocityThreshold: 0.05,
+                    // swipe가 적용되기 위한 최대 거리
                     directionalOffsetThreshold: 100,
                 }}
                 style={styles.gestureContainer}>
