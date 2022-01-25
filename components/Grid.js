@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, ToastAndroid, View } from 'react-native';
 import NumBox from '../models/NumBox';
 import GridRow from './GridRow';
@@ -26,102 +26,68 @@ const arrayIsEqual = (arr1, arr2) => {
     return false;
 };
 
-const Grid = ({ action }) => {
-    // action 바뀔 경우 처리
-    useEffect(() => {
-        switch (action.action) {
-            case 'INIT':
-                return init();
-            case 'LEFT':
-                return goLeft();
-            case 'RIGHT':
-                return goRight();
-            case 'UP':
-                return goUp();
-            case 'DOWN':
-                return goDown();
-        }
-    }, [action]);
+const MoveGrid = {
+    // 완전히 초기화된 그리드
+    getInitialData() {
+        return Array.from({ length: BOX_SIZE }, () =>
+            Array(BOX_SIZE).fill(null),
+        );
+    },
+    // 최초 랜덤값이 세팅된 그리드
+    getStartData() {
+        const rand = () => Math.floor(Math.random() * BOX_SIZE);
+        const data = this.getInitialData();
+        // TODO 둘이 겹치는 경우? 깔끔한 방법이 없을까..
+        data[rand()][rand()] = new NumBox(2);
+        data[rand()][rand()] = new NumBox(2);
+        return data;
+    },
+    // 움직이기
+    goMove(dt, { row, col }) {
+        // null이 들어간 배열로 초기화
+        const newData = this.getInitialData();
 
-    const [data, setData] = useState(getStartData());
+        const inc = row !== 0 ? Math.sign(row) : col !== 0 ? Math.sign(col) : 0;
+        if (!inc) return [...dt];
 
-    // 배열 초기화
-    const init = useCallback(() => {
-        setData(getStartData());
-    }, []);
+        const first = inc > 0 ? 0 : BOX_SIZE - 1;
+        for (let i = 0; i < BOX_SIZE; i++) {
+            let lastI = first;
+            for (let j = 0; j < BOX_SIZE; j++) {
+                const ii = row === 0 ? i : row > 0 ? j : first - j;
+                const jj = col === 0 ? i : col > 0 ? j : first - j;
 
-    // data 초기화, 불변성 유지를 위해 비교 로직 제외하고 공통화
-    const goTemplate = ({ row, col } = { row: 0, col: 1 }) => {
-        setData(dt => {
-            // null이 들어간 배열로 초기화
-            const newData = getInitialData();
-
-            const inc =
-                row !== 0 ? Math.sign(row) : col !== 0 ? Math.sign(col) : 0;
-            if (!inc) return [...dt];
-
-            const first = inc > 0 ? 0 : BOX_SIZE - 1;
-            for (let i = 0; i < BOX_SIZE; i++) {
-                let lastI = first;
-                for (let j = 0; j < BOX_SIZE; j++) {
-                    // const ii = row > 0 ? i : BOX_SIZE - i - 1;
-                    // const jj = col > 0 ? j : BOX_SIZE - j - 1;
-
-                    const ii = row === 0 ? i : row > 0 ? j : first - j;
-                    const jj = col === 0 ? i : col > 0 ? j : first - j;
-
-                    if (dt[ii][jj]) {
-                        const checkI = row ? lastI - row : ii;
-                        const checkJ = col ? lastI - col : jj;
-                        if (
-                            lastI * inc > first * inc &&
-                            newData[checkI][checkJ].equals(dt[ii][jj])
-                        ) {
-                            newData[checkI][checkJ].multiple();
-                        } else {
-                            newData[row ? lastI : ii][col ? lastI : jj] =
-                                dt[ii][jj];
-                            lastI += row || col;
-                        }
+                if (dt[ii][jj]) {
+                    const checkI = row ? lastI - row : ii;
+                    const checkJ = col ? lastI - col : jj;
+                    if (
+                        lastI * inc > first * inc &&
+                        newData[checkI][checkJ].equals(dt[ii][jj])
+                    ) {
+                        newData[checkI][checkJ].multiple();
+                    } else {
+                        newData[row ? lastI : ii][col ? lastI : jj] =
+                            dt[ii][jj];
+                        lastI += row || col;
                     }
                 }
             }
+        }
 
-            // 이전/이후 data가 동일한지 비교하고, 동일하지 않으면 랜덤 2 박스를 생성한다.
-            if (arrayIsEqual(newData, dt)) {
-                // pass
-            } else {
-                const val = setRandom(newData);
-                if (val) {
-                    newData[val[0]][val[1]] = new NumBox(2);
-                }
+        // 이전/이후 data가 동일한지 비교하고, 동일하지 않으면 랜덤 2 박스를 생성한다.
+        if (arrayIsEqual(newData, dt)) {
+            // pass
+        } else {
+            const val = this.setRandom(newData);
+            if (val) {
+                newData[val[0]][val[1]] = new NumBox(2);
             }
+        }
 
-            return newData;
-        });
-    };
-
-    // 왼쪽으로 가기
-    const goLeft = () => {
-        goTemplate({ row: 0, col: 1 });
-    };
-
-    // 오른쪽으로 가기
-    const goRight = () => {
-        goTemplate({ row: 0, col: -1 });
-    };
-
-    // 위으로 가기
-    const goUp = () => {
-        goTemplate({ row: 1, col: 0 });
-    };
-    // 아래로 가기
-    const goDown = () => {
-        goTemplate({ row: -1, col: 0 });
-    };
-
+        return newData;
+    },
     // 비어있는 위치 선택
-    const setRandom = dt => {
+    setRandom(dt) {
         // 0이 들어가 있는 리스트 찾기
         const zeroList = [];
         for (let i = 0; i < BOX_SIZE; i++) {
@@ -139,7 +105,43 @@ const Grid = ({ action }) => {
             // 0 들어갈 공간 없는 경우
             return null;
         }
-    };
+    },
+    // 왼쪽으로 가기
+    goLeft(dt) {
+        return this.goMove(dt, { row: 0, col: 1 });
+    },
+    // 오른쪽으로 가기
+    goRight(dt) {
+        return this.goMove(dt, { row: 0, col: -1 });
+    },
+    // 위으로 가기
+    goUp(dt) {
+        return this.goMove(dt, { row: 1, col: 0 });
+    },
+    // 아래로 가기
+    goDown(dt) {
+        return this.goMove(dt, { row: -1, col: 0 });
+    },
+};
+
+const Grid = ({ action }) => {
+    // action 바뀔 경우 처리
+    useEffect(() => {
+        switch (action.action) {
+            case 'INIT':
+                return setData(MoveGrid.getStartData());
+            case 'LEFT':
+                return setData(dt => MoveGrid.goLeft(dt));
+            case 'RIGHT':
+                return setData(dt => MoveGrid.goRight(dt));
+            case 'UP':
+                return setData(dt => MoveGrid.goUp(dt));
+            case 'DOWN':
+                return setData(dt => MoveGrid.goDown(dt));
+        }
+    }, [action]);
+
+    const [data, setData] = useState(MoveGrid.getStartData());
 
     return (
         <View style={styles.container}>
@@ -148,17 +150,6 @@ const Grid = ({ action }) => {
             ))}
         </View>
     );
-};
-
-const getInitialData = () =>
-    Array.from({ length: BOX_SIZE }, () => Array(BOX_SIZE).fill(null));
-const getStartData = () => {
-    const rand = () => Math.floor(Math.random() * BOX_SIZE);
-    const data = getInitialData();
-    // TODO 둘이 겹치는 경우? 깔끔한 방법이 없을까..
-    data[rand()][rand()] = new NumBox(2);
-    data[rand()][rand()] = new NumBox(2);
-    return data;
 };
 
 const styles = StyleSheet.create({
