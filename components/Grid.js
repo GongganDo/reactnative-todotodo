@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, ToastAndroid, View } from 'react-native';
 import NumBox from '../models/NumBox';
 import GridRow from './GridRow';
@@ -46,21 +46,45 @@ const Grid = ({ action }) => {
     const [data, setData] = useState(getStartData());
 
     // 배열 초기화
-    const init = () => {
+    const init = useCallback(() => {
         setData(getStartData());
-    };
+    }, []);
 
     // data 초기화, 불변성 유지를 위해 비교 로직 제외하고 공통화
-    const goTemplate = cb => {
+    const goTemplate = ({ row, col } = { row: 0, col: 1 }) => {
         setData(dt => {
             // null이 들어간 배열로 초기화
-            let newData = getInitialData();
+            const newData = getInitialData();
 
-            // newDat 만드는 동작은 callback (cb) 에서 처리. cb가 없으면 그대로 둔다.
-            if (typeof cb === 'function') {
-                newData = cb(dt, newData) || dt;
-            } else {
-                newData = dt;
+            const inc =
+                row !== 0 ? Math.sign(row) : col !== 0 ? Math.sign(col) : 0;
+            if (!inc) return [...dt];
+
+            const first = inc > 0 ? 0 : BOX_SIZE - 1;
+            for (let i = 0; i < BOX_SIZE; i++) {
+                let lastI = first;
+                for (let j = 0; j < BOX_SIZE; j++) {
+                    // const ii = row > 0 ? i : BOX_SIZE - i - 1;
+                    // const jj = col > 0 ? j : BOX_SIZE - j - 1;
+
+                    const ii = row === 0 ? i : row > 0 ? j : first - j;
+                    const jj = col === 0 ? i : col > 0 ? j : first - j;
+
+                    if (dt[ii][jj]) {
+                        const checkI = row ? lastI - row : ii;
+                        const checkJ = col ? lastI - col : jj;
+                        if (
+                            lastI * inc > first * inc &&
+                            newData[checkI][checkJ].equals(dt[ii][jj])
+                        ) {
+                            newData[checkI][checkJ].multiple();
+                        } else {
+                            newData[row ? lastI : ii][col ? lastI : jj] =
+                                dt[ii][jj];
+                            lastI += row || col;
+                        }
+                    }
+                }
             }
 
             // 이전/이후 data가 동일한지 비교하고, 동일하지 않으면 랜덤 2 박스를 생성한다.
@@ -79,93 +103,21 @@ const Grid = ({ action }) => {
 
     // 왼쪽으로 가기
     const goLeft = () => {
-        goTemplate((dt, dd) => {
-            const newData = dd;
-            for (let i = 0; i < BOX_SIZE; i++) {
-                let lastI = 0;
-                for (let j = 0; j < BOX_SIZE; j++) {
-                    if (dt[i][j]) {
-                        if (
-                            lastI > 0 &&
-                            newData[i][lastI - 1].equals(dt[i][j])
-                        ) {
-                            newData[i][lastI - 1].multiple();
-                        } else {
-                            newData[i][lastI++] = dt[i][j];
-                        }
-                    }
-                }
-            }
-            return newData;
-        });
+        goTemplate({ row: 0, col: 1 });
     };
 
     // 오른쪽으로 가기
     const goRight = () => {
-        goTemplate((dt, dd) => {
-            const newData = dd;
-            for (let i = 0; i < BOX_SIZE; i++) {
-                let lastI = BOX_SIZE - 1;
-                for (let j = BOX_SIZE - 1; j >= 0; j--) {
-                    if (dt[i][j]) {
-                        if (
-                            lastI < BOX_SIZE - 1 &&
-                            newData[i][lastI + 1].equals(dt[i][j])
-                        ) {
-                            newData[i][lastI + 1] = dt[i][j].multiple();
-                        } else {
-                            newData[i][lastI--] = dt[i][j];
-                        }
-                    }
-                }
-            }
-            return newData;
-        });
+        goTemplate({ row: 0, col: -1 });
     };
 
     // 위으로 가기
     const goUp = () => {
-        goTemplate((dt, dd) => {
-            const newData = dd;
-            for (let i = 0; i < BOX_SIZE; i++) {
-                let lastI = 0;
-                for (let j = 0; j < BOX_SIZE; j++) {
-                    if (dt[j][i]) {
-                        if (
-                            lastI > 0 &&
-                            newData[lastI - 1][i].equals(dt[j][i])
-                        ) {
-                            newData[lastI - 1][i].multiple();
-                        } else {
-                            newData[lastI++][i] = dt[j][i];
-                        }
-                    }
-                }
-            }
-            return newData;
-        });
+        goTemplate({ row: 1, col: 0 });
     };
     // 아래로 가기
     const goDown = () => {
-        goTemplate((dt, dd) => {
-            const newData = dd;
-            for (let i = 0; i < BOX_SIZE; i++) {
-                let lastI = BOX_SIZE - 1;
-                for (let j = BOX_SIZE - 1; j >= 0; j--) {
-                    if (dt[j][i]) {
-                        if (
-                            lastI < BOX_SIZE - 1 &&
-                            newData[lastI + 1][i].equals(dt[j][i])
-                        ) {
-                            newData[lastI + 1][i] = dt[j][i].multiple();
-                        } else {
-                            newData[lastI--][i] = dt[j][i];
-                        }
-                    }
-                }
-            }
-            return newData;
-        });
+        goTemplate({ row: -1, col: 0 });
     };
 
     // 비어있는 위치 선택
