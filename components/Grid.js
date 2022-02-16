@@ -5,6 +5,9 @@ import GridRow from './GridRow';
 
 const BOX_SIZE = 4;
 
+// 등록된 전역 이벤트 객체
+let events = {};
+
 // 배열 동일 여부 체크
 const arrayIsEqual = (arr1, arr2) => {
     if (arr1.length === arr2.length) {
@@ -24,6 +27,18 @@ const arrayIsEqual = (arr1, arr2) => {
         return true;
     }
     return false;
+};
+
+// 게임오버 여부 판별
+const isGameOver = data => {
+    for (let i = 0; i < data.length; i++) {
+        for (let j = 0; j < data[i].length; j++) {
+            if (!data[i][j]) return false;
+            if (i > 0 && data[i][j].equals(data[i - 1][j])) return false;
+            if (j > 0 && data[i][j].equals(data[i][j - 1])) return false;
+        }
+    }
+    return true;
 };
 
 const MoveGrid = {
@@ -84,6 +99,13 @@ const MoveGrid = {
             }
         }
 
+        // 게임오버 여부 체크
+        if (isGameOver(newData)) {
+            if (typeof events.gameOver === 'function') {
+                events.gameOver();
+            }
+        }
+
         return newData;
     },
     // 비어있는 위치 선택
@@ -124,7 +146,7 @@ const MoveGrid = {
     },
 };
 
-const Grid = ({ action }) => {
+const Grid = ({ action, onGameOver }) => {
     // action 바뀔 경우 처리
     useEffect(() => {
         switch (action.action) {
@@ -142,6 +164,8 @@ const Grid = ({ action }) => {
     }, [action]);
 
     const [data, setData] = useState(MoveGrid.getStartData());
+
+    events = { ...events, gameOver: onGameOver };
 
     return (
         <View style={styles.container}>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
     SafeAreaView,
     StyleSheet,
@@ -6,6 +6,7 @@ import {
     Button,
     View,
     Alert,
+    ToastAndroid,
 } from 'react-native';
 import GestureRecognizer, {
     swipeDirections,
@@ -14,9 +15,12 @@ import Grid from './components/Grid';
 import Header from './components/Header';
 
 const App = () => {
+    // App에서 실행되는 이동 action
     const [action, setAction] = useState('');
+    // action을 수행하지 않을지 여부 선택
+    const [isFreeze, setFreeze] = useState(false);
 
-    const initAction = () => {
+    const initAction = useCallback(() => {
         Alert.alert(
             '2048',
             '초기화하시겠습니까? 초기화하면 진행되던 게임이 없어집니다.',
@@ -24,14 +28,24 @@ const App = () => {
                 { text: '아니오', style: 'cancel' },
                 {
                     text: '예',
-                    onPress: () => setAction({ action: 'INIT' }),
+                    onPress: () => {
+                        setFreeze(false);
+                        setAction({ action: 'INIT' });
+                    },
                 },
             ],
             { cancelable: true },
         );
+    }, []);
+
+    const pressAction = actionName => {
+        if (isFreeze) return;
+        setAction({ action: actionName });
     };
 
     const onSwipe = (gestureName, gestureState) => {
+        if (isFreeze) return;
+
         const { dx, dy, vx, vy } = gestureState;
         console.log('swipe', gestureName, [dx, dy], [vx, vy]);
         const { SWIPE_UP, SWIPE_DOWN, SWIPE_LEFT, SWIPE_RIGHT } =
@@ -52,6 +66,12 @@ const App = () => {
         }
     };
 
+    const gameOver = useCallback(() => {
+        ToastAndroid.show('게임오버!', ToastAndroid.SHORT);
+        console.log('freezed!');
+        setFreeze(true);
+    }, []);
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar backgroundColor={bg} />
@@ -65,29 +85,33 @@ const App = () => {
                     directionalOffsetThreshold: 50,
                 }}
                 style={styles.gestureContainer}>
-                <Grid action={action} />
+                <Grid action={action} onGameOver={() => gameOver()} />
             </GestureRecognizer>
             <View style={styles.buttonView}>
                 <Button
                     color={bg}
                     title="LEFT"
-                    onPress={() => setAction({ action: 'LEFT' })}
+                    disabled={isFreeze}
+                    onPress={() => pressAction('LEFT')}
                 />
                 <Button
                     color={bg}
                     title="UP"
-                    onPress={() => setAction({ action: 'UP' })}
+                    disabled={isFreeze}
+                    onPress={() => pressAction('UP')}
                 />
                 <Button color="red" title="INIT" onPress={initAction} />
                 <Button
                     color={bg}
                     title="DOWN"
-                    onPress={() => setAction({ action: 'DOWN' })}
+                    disabled={isFreeze}
+                    onPress={() => pressAction('DOWN')}
                 />
                 <Button
                     color={bg}
                     title="RIGHT"
-                    onPress={() => setAction({ action: 'RIGHT' })}
+                    disabled={isFreeze}
+                    onPress={() => pressAction('RIGHT')}
                 />
             </View>
         </SafeAreaView>
