@@ -7,6 +7,7 @@ import {
     View,
     Alert,
     ToastAndroid,
+    Text,
 } from 'react-native';
 import GestureRecognizer, {
     swipeDirections,
@@ -19,6 +20,8 @@ const App = () => {
     const [action, setAction] = useState('');
     // action을 수행하지 않을지 여부 선택
     const [isFreeze, setFreeze] = useState(false);
+    // 점수
+    const [score, setScore] = useState(0);
 
     const initAction = useCallback(() => {
         Alert.alert(
@@ -30,6 +33,7 @@ const App = () => {
                     text: '예',
                     onPress: () => {
                         setFreeze(false);
+                        setScore(0);
                         setAction({ action: 'INIT' });
                     },
                 },
@@ -85,7 +89,17 @@ const App = () => {
                     directionalOffsetThreshold: 50,
                 }}
                 style={styles.gestureContainer}>
-                <Grid action={action} onGameOver={() => gameOver()} />
+                <View>
+                    <Text>SCORE</Text>
+                    <Text>{score}</Text>
+                </View>
+                <Grid
+                    action={action}
+                    onGameOver={() => gameOver()}
+                    onAddScore={addValue =>
+                        addValue && setScore(score + addValue)
+                    }
+                />
             </GestureRecognizer>
             <View style={styles.buttonView}>
                 <Button

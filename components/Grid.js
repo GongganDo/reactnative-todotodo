@@ -61,6 +61,8 @@ const MoveGrid = {
     goMove(dt, { row, col }) {
         // null이 들어간 배열로 초기화
         const newData = this.getInitialData();
+        // 숫자 합쳐지면 계산될 점수
+        let moveSum = 0;
 
         const inc = row !== 0 ? Math.sign(row) : col !== 0 ? Math.sign(col) : 0;
         if (!inc) return [...dt];
@@ -80,6 +82,7 @@ const MoveGrid = {
                         newData[checkI][checkJ].equals(dt[ii][jj])
                     ) {
                         newData[checkI][checkJ].multiple();
+                        moveSum += newData[checkI][checkJ].num;
                     } else {
                         newData[row ? lastI : ii][col ? lastI : jj] =
                             dt[ii][jj];
@@ -103,6 +106,13 @@ const MoveGrid = {
         if (isGameOver(newData)) {
             if (typeof events.gameOver === 'function') {
                 events.gameOver();
+            }
+        }
+
+        // 이동 후 수치 갱신
+        if (moveSum >= 0) {
+            if (typeof events.addScore === 'function'){
+                events.addScore(moveSum);
             }
         }
 
@@ -146,7 +156,7 @@ const MoveGrid = {
     },
 };
 
-const Grid = ({ action, onGameOver }) => {
+const Grid = ({ action, onGameOver, onAddScore }) => {
     // action 바뀔 경우 처리
     useEffect(() => {
         switch (action.action) {
@@ -165,7 +175,7 @@ const Grid = ({ action, onGameOver }) => {
 
     const [data, setData] = useState(MoveGrid.getStartData());
 
-    events = { ...events, gameOver: onGameOver };
+    events = { ...events, gameOver: onGameOver, addScore: onAddScore };
 
     return (
         <View style={styles.container}>
